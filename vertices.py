@@ -56,14 +56,14 @@ class Multiplication(Vertex):
         return [y * d, x * d]
 
 
-class Addition(Vertex):
+class AddBias(Vertex):
     def func(self, inputs):
-        x, y = inputs
-        return x + y
+        x, b = inputs
+        return x + b
 
     def grads(self, inputs, d):
-        x, y = inputs
-        return [np.ones(x.shape) * d, np.ones(y.shape) * d]
+        x, b = inputs
+        return [np.ones(x.shape) * d, np.ones(b.shape) * d.sum(axis=0)]
 
 
 class Inverse(Vertex):
