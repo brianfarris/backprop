@@ -1,45 +1,44 @@
 import numpy as np
-from vertices import Multiplication, Addition, Inverse, Squared, Sigmoid, Input
+from vertices import Multiplication, Addition, Inverse, Squared, Sigmoid, Input, Dot, Softmax, CrossEntropy
 
 
-def forward(vertex):
-    if vertex.value is None:
-        inputs = [forward(edge).value for edge in vertex.edges]
+class BackProp:
+    def __init__(self, x, y, loss, step_size):
+        self.stack = []
+        self.x = x
+        self.y = y
+        self.loss = loss
+        self.loss.grad_value = 1.0
+        self.step_size = step_size
+
+    def forward(self, vertex):
+        inputs = [self.forward(edge).value for edge in vertex.edges]
         vertex.value = vertex.func(inputs)
-        stack.append(vertex)
-    return vertex
-
-def backward(stack):
-    while stack:
-        vertex = stack.pop()
-        inputs = [edge.value for edge in vertex.edges]
-        grads = vertex.grads(inputs)
-        for i, edge in enumerate(vertex.edges):
-            edge.grad_value += vertex.grad_value * grads[i]
+        self.stack.append(vertex)
+        return vertex
 
 
-if __name__ == "__main__":
-    x = Input(name="x")
-    x.value = np.array(3)
+    def backward(self):
+        while self.stack:
+            vertex = self.stack.pop()
+            inputs = [edge.value for edge in vertex.edges]
+            grads = vertex.grads(inputs, vertex.grad_value)
+            for i, edge in enumerate(vertex.edges):
+                edge.grad_value += grads[i]
+            if vertex.trainable:
+                vertex.value -= (self.step_size * vertex.grad_value)
+            # else:
+            #     vertex.value = None
+            vertex.grad_value = 0.0
+            
+    def batch(self, x_batch, y_batch):
+        self.x.value = x_batch
+        self.y.value = y_batch
+        self.forward(self.loss)
+        self.backward()
 
-    y = Input(name="y")
-    y.value = np.array(7)
-
-    sigy = Sigmoid([y], name="sigy")
-    numerator = Addition([x, sigy], name="numerator")
-    x_plus_y = Addition([x, y], name="x_plus_y")
-    x_plus_y_sq = Squared([x_plus_y], name="x_plus_y_sq")
-    sigx = Sigmoid([x], name="sigx")
-    denominator = Addition([sigx, x_plus_y_sq], name="denomiinator")
-    denominator_inv = Inverse([denominator], name="denominator_inv")
-    mult = Multiplication([numerator, denominator_inv])
-
-    stack = []
-    forward(mult)
-    print("L: ", stack[-1].value)
-
-    mult.grad_value = 1.
-
-    backward(stack)
-    print("dx: ", x.grad_value)
-    print("dy: ", y.grad_value)
+    def predict(self, x, y):
+        self.x.value = x
+        self.y.value = y
+        self.forward(self.loss)
+        return self.loss.edges[0].value
