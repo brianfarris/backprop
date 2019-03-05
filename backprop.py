@@ -1,5 +1,4 @@
 import numpy as np
-from vertices import Multiplication, Addition, Inverse, Squared, Sigmoid, Input, Dot, Softmax, CrossEntropy
 
 
 class BackProp:
@@ -17,7 +16,6 @@ class BackProp:
         self.stack.append(vertex)
         return vertex
 
-
     def backward(self):
         while self.stack:
             vertex = self.stack.pop()
@@ -27,10 +25,8 @@ class BackProp:
                 edge.grad_value += grads[i]
             if vertex.trainable:
                 vertex.value -= (self.step_size * vertex.grad_value)
-            # else:
-            #     vertex.value = None
             vertex.grad_value = 0.0
-            
+
     def batch(self, x_batch, y_batch):
         self.x.value = x_batch
         self.y.value = y_batch

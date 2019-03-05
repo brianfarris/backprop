@@ -23,7 +23,6 @@ class Dot(Vertex):
 class Softmax(Vertex):
     def func(self, inputs):
         h = inputs[0]
-        #print("h: ", h)
         num = np.exp(h - h.max(axis=1, keepdims=True))
         denom = num.sum(axis=1, keepdims=True)
         return num / denom
@@ -45,6 +44,7 @@ class CrossEntropy(Vertex):
         nrows = y_true.shape[0]
         return [- y_true / y_pred / nrows,
                 - np.log(y_pred) / nrows]
+
 
 class Multiplication(Vertex):
     def func(self, inputs):
@@ -75,6 +75,7 @@ class Inverse(Vertex):
         x = inputs[0]
         return [-1. / x / x * d]
 
+
 class Squared(Vertex):
     def func(self, inputs):
         x = inputs[0]
@@ -84,6 +85,7 @@ class Squared(Vertex):
         x = inputs[0]
         return [2. * x * d]
 
+
 class Sigmoid(Vertex):
     def func(self, inputs):
         x = inputs[0]
@@ -92,6 +94,7 @@ class Sigmoid(Vertex):
     def grads(self, inputs, d):
         sig = self.func(inputs)
         return [sig * (1. - sig) * d]
+
 
 class Input(Vertex):
     def func(self, inputs):
