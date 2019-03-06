@@ -1,5 +1,5 @@
 import numpy as np
-from vertices_general import Vertex
+from vertices.vertices_general import Vertex
 
 
 class Dot(Vertex):

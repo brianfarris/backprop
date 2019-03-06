@@ -1,7 +1,7 @@
 import numpy as np
-from vertices_general import Input
-from vertices_basic import Multiplication, Addition, Inverse, Squared, Sigmoid
-from backprop import BackProp
+from vertices.vertices_general import Input
+from vertices.vertices_basic import Multiplication, Addition, Inverse, Squared, Sigmoid
+from backprop.traverse import Traverse
 
 
 if __name__ == "__main__":
@@ -21,10 +21,10 @@ if __name__ == "__main__":
     mult = Multiplication([numerator, denominator_inv])
 
     learning_rate = 1.0
-    backprop = BackProp(learning_rate)
-    backprop.forward(mult)
-    print("L: ", backprop.stack[-1].value)
+    traverse = Traverse(learning_rate)
+    traverse.forward(mult)
+    print("L: ", traverse.stack[-1].value)
 
     mult.grad_value = 1.
 
-    backprop.backward(print_grads=True)
+    traverse.backward(print_grads=True)

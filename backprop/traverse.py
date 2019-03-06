@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class BackProp:
+class Traverse:
     def __init__(self, learning_rate):
         self.stack = []
         self.learning_rate = learning_rate
