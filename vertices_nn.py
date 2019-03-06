@@ -1,13 +1,5 @@
 import numpy as np
-
-
-class Vertex:
-    def __init__(self, edges=[], name=None, trainable=False):
-        self.name = name
-        self.edges = edges
-        self.value = None
-        self.grad_value = 0
-        self.trainable = trainable
+from vertices_general import Vertex
 
 
 class Dot(Vertex):
@@ -18,6 +10,7 @@ class Dot(Vertex):
     def grads(self, inputs, d):
         x, w = inputs
         return [np.dot(d, w.T), np.dot(x.T, d)]
+
 
 class Relu(Vertex):
     def func(self, inputs):
@@ -55,16 +48,6 @@ class CrossEntropy(Vertex):
                 - np.log(y_pred) / nrows]
 
 
-class Multiplication(Vertex):
-    def func(self, inputs):
-        x, y = inputs
-        return x * y
-
-    def grads(self, inputs, d):
-        x, y = inputs
-        return [y * d, x * d]
-
-
 class AddBias(Vertex):
     def func(self, inputs):
         x, b = inputs
@@ -73,41 +56,3 @@ class AddBias(Vertex):
     def grads(self, inputs, d):
         x, b = inputs
         return [np.ones(x.shape) * d, np.ones(b.shape) * d.sum(axis=0)]
-
-
-class Inverse(Vertex):
-    def func(self, inputs):
-        x = inputs[0]
-        return 1. / x
-
-    def grads(self, inputs, d):
-        x = inputs[0]
-        return [-1. / x / x * d]
-
-
-class Squared(Vertex):
-    def func(self, inputs):
-        x = inputs[0]
-        return x * x
-
-    def grads(self, inputs, d):
-        x = inputs[0]
-        return [2. * x * d]
-
-
-class Sigmoid(Vertex):
-    def func(self, inputs):
-        x = inputs[0]
-        return 1. / (1. + np.exp(-x))
-
-    def grads(self, inputs, d):
-        sig = self.func(inputs)
-        return [sig * (1. - sig) * d]
-
-
-class Input(Vertex):
-    def func(self, inputs):
-        return self.value
-
-    def grads(self, inputs, d):
-        pass

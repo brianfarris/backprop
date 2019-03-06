@@ -1,5 +1,6 @@
 import numpy as np
-from vertices import Multiplication, Addition, Inverse, Squared, Sigmoid, Input
+from vertices_general import Input
+from vertices_basic import Multiplication, Addition, Inverse, Squared, Sigmoid
 from backprop import BackProp
 
 
@@ -8,7 +9,7 @@ if __name__ == "__main__":
     x.value = np.array(3)
 
     y = Input(name="y")
-    y.value = np.array(7)
+    y.value = np.array(-4)
 
     sigy = Sigmoid([y], name="sigy")
     numerator = Addition([x, sigy], name="numerator")
@@ -19,13 +20,10 @@ if __name__ == "__main__":
     denominator_inv = Inverse([denominator], name="denominator_inv")
     mult = Multiplication([numerator, denominator_inv])
 
-
-    backprop = BackProp()
+    backprop = BackProp(x, y)
     backprop.forward(mult)
     print("L: ", backprop.stack[-1].value)
 
     mult.grad_value = 1.
 
-    backprop.backward()
-    print("dx: ", x.grad_value)
-    print("dy: ", y.grad_value)
+    backprop.backward(1.0, print_grads=True)

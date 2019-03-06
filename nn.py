@@ -1,5 +1,6 @@
 import numpy as np
-from vertices import Input, Dot, Softmax, CrossEntropy, AddBias, Relu
+from vertices_general import Input
+from vertices_nn import Dot, Softmax, CrossEntropy, AddBias, Relu
 from backprop import BackProp
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -42,8 +43,6 @@ if __name__ == "__main__":
     backprop = BackProp(x, y)
 
     N = int(1e5)
-    #np.random.seed(42)
-
     x_in = np.random.normal(0, 1, (N//2, 2))
     r = np.random.normal(6,0.5, (N//2, 1))
     phi = np.random.uniform(0, 2. * np.pi, (N//2, 1))
@@ -76,6 +75,7 @@ if __name__ == "__main__":
         backprop.y.value = y_test
         backprop.forward(L)
         val_loss_history.append(L.value)
+        backprop.backward(lr)
 
     plt.figure(figsize=(4, 8))
     plt.subplot(2, 1, 1)
