@@ -18,15 +18,15 @@ if __name__ == "__main__":
     h1 = AddBias([dot1, b1], name="add1")
     h1_relu = Relu([h1], name="relu1")
 
-    w2 = Input(name="w2", trainable=True)
-    w2.value = np.random.normal(0, 0.001, (4, 2))
-    b2 = Input(name="b2", trainable=True)
-    b2.value = np.random.normal(0, 0.001, (1, 2))
+    w1 = Input(name="w2", trainable=True)
+    w1.value = np.random.normal(0, 0.001, (4, 2))
+    b1 = Input(name="b2", trainable=True)
+    b1.value = np.random.normal(0, 0.001, (1, 2))
 
-    dot2 = Dot([h1_relu, w2], name="dot2")
-    h2 = AddBias([dot2, b2], name="add2")
+    dot1 = Dot([h1_relu, w1], name="dot2")
+    h1 = AddBias([dot1, b1], name="add2")
 
-    p = Softmax([h2], name="softmax")
+    p = Softmax([h1], name="softmax")
     L = CrossEntropy([p, y], name="cross_entropy")
 
     backprop = BackProp(x, y, L, 0.001)
