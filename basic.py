@@ -20,10 +20,11 @@ if __name__ == "__main__":
     denominator_inv = Inverse([denominator], name="denominator_inv")
     mult = Multiplication([numerator, denominator_inv])
 
-    backprop = BackProp(x, y)
+    learning_rate = 1.0
+    backprop = BackProp(learning_rate)
     backprop.forward(mult)
     print("L: ", backprop.stack[-1].value)
 
     mult.grad_value = 1.
 
-    backprop.backward(1.0, print_grads=True)
+    backprop.backward(print_grads=True)

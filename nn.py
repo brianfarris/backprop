@@ -4,78 +4,84 @@ from vertices_nn import Dot, Softmax, CrossEntropy, AddBias, Relu
 from backprop import BackProp
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from data import get_train_test, chunks
 
 
 if __name__ == "__main__":
     x = Input(name="x")
     y = Input(name="y")
 
+    # Weights for 1st hidden layer
     w1 = Input(name="w1", trainable=True)
     w1.value = np.random.normal(0, 0.0001, (2, 4))
     b1 = Input(name="b1", trainable=True)
     b1.value = np.zeros((1, 4))
 
+    # Apply 1st hidden layer
     dot1 = Dot([x, w1], name="dot1")
     h1 = AddBias([dot1, b1], name="add1")
     h1_relu = Relu([h1], name="relu1")
 
+    # Weights for 2nd hidden layer
     w2 = Input(name="w2", trainable=True)
     w2.value = np.diag(np.random.normal(1, 0.0001, 4))
     b2 = Input(name="b2", trainable=True)
     b2.value = np.zeros((1, 4))
 
+    # Apply 2nd hidden layer
     dot2 = Dot([h1_relu, w2], name="dot2")
     h2 = AddBias([dot2, b2], name="add2")
     h2_relu = Relu([h2], name="relu2")
 
+    # Weights for final dense layer
     w3 = Input(name="w3", trainable=True)
     w3.value = np.random.normal(0, 0.0001, (4, 2))
     b3 = Input(name="b3", trainable=True)
     b3.value = np.zeros((1, 2))
 
+    # Apply final dense layer
     dot3 = Dot([h2_relu, w3], name="dot3")
     h3 = AddBias([dot3, b3], name="add3")
 
+    # Apply softmax
     p = Softmax([h3], name="softmax")
+
+    # use categorical crossentropy for loss
     L = CrossEntropy([p, y], name="cross_entropy")
+
+    # dL / dL = 1
     L.grad_value = 1.0
 
-    backprop = BackProp(x, y)
+    learning_rate = 1.e-3
+    backprop = BackProp(learning_rate)
 
-    N = int(1e5)
-    x_in = np.random.normal(0, 1, (N//2, 2))
-    r = np.random.normal(6,0.5, (N//2, 1))
-    phi = np.random.uniform(0, 2. * np.pi, (N//2, 1))
-    x_out = np.hstack([r * np.cos(phi), r * np.sin(phi)])
-    x_full = np.vstack([x_in, x_out])
-    y_in = np.vstack([np.zeros((N//2, 1)), np.ones((N//2, 1))])
-    y_out = np.vstack([np.ones((N//2, 1)), np.zeros((N//2, 1))])
-    y_full = np.hstack([y_in, y_out])
-    x_train, x_test, y_train, y_test = train_test_split(x_full, y_full, test_size=0.1)
+    # Get the data
+    x_full, y_full = get_train_test()
+    (x_train, x_test,
+     y_train, y_test) = train_test_split(x_full, y_full,
+                                         test_size=0.1)
 
     loss_history = []
     val_loss_history = []
-    lr = 1.e-3
+
     for epoch in range(20):
         if epoch % 1 == 0:
             print(epoch)
-        for i in range(x_train.shape[0] // 10):
-            x_batch = x_train[i * 10: (i+1)*10, :]
-            y_batch = y_train[i * 10: (i+1)*10, :]
 
-            backprop.x.value = x_batch
-            backprop.y.value = y_batch
+        for x_batch, y_batch in chunks(x_train, y_train, 10):
+            x.value = x_batch
+            y.value = y_batch
 
             backprop.forward(L)
-            backprop.backward(lr)
+            backprop.backward()
 
         loss_history.append(L.value)
 
-        backprop.x.value = x_test
-        backprop.y.value = y_test
+        # Calculate the Loss on test set
+        x.value, y.value = x_test, y_test
         backprop.forward(L)
         val_loss_history.append(L.value)
-        backprop.backward(lr)
+        backprop.backward()
 
     plt.figure(figsize=(4, 8))
     plt.subplot(2, 1, 1)
@@ -83,13 +89,12 @@ if __name__ == "__main__":
     plt.plot(loss_history)
     plt.plot(val_loss_history)
 
-    backprop.x.value = x_test
-    backprop.y.value = y_test
+    # get prediction on test set
+    x.value, y.value = x_test, y_test
     backprop.forward(L)
     y_pred = L.edges[0].value
+    backprop.backward()
 
     plt.subplot(2, 1, 2)
     plt.scatter(x_test[:, 0], x_test[:, 1], c=y_pred[:, 0])
-    #plt.xlim(-3, 3)
-    #plt.ylim(-3, 3)
     plt.show()

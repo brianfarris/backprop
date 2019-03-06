@@ -2,10 +2,9 @@ import numpy as np
 
 
 class BackProp:
-    def __init__(self, x, y):
+    def __init__(self, learning_rate):
         self.stack = []
-        self.x = x
-        self.y = y
+        self.learning_rate = learning_rate
 
     def forward(self, vertex):
         if not vertex.visited:
@@ -15,7 +14,7 @@ class BackProp:
             self.stack.append(vertex)
         return vertex
 
-    def backward(self, step_size, print_grads=False, update_weights=True):
+    def backward(self, print_grads=False, update_weights=True):
         while self.stack:
             vertex = self.stack.pop()
             inputs = [edge.value for edge in vertex.edges]
@@ -23,7 +22,7 @@ class BackProp:
             for i, edge in enumerate(vertex.edges):
                 edge.grad_value += grads[i]
             if vertex.trainable and update_weights:
-                vertex.value -= (step_size * vertex.grad_value)
+                vertex.value -= (self.learning_rate * vertex.grad_value)
             vertex.visited = False
             if print_grads:
                 print(vertex.name, "gradient: ", vertex.grad_value)
