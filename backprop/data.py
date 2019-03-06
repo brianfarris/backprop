@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-def get_train_test():
+def get_train_test_nn():
     N = int(1e5)
     x_in = np.random.normal(0, 1, (N//2, 2))
     r = np.random.normal(6, 0.5, (N//2, 1))
@@ -12,6 +12,20 @@ def get_train_test():
     y_in = np.vstack([np.zeros((N//2, 1)), np.ones((N//2, 1))])
     y_out = np.vstack([np.ones((N//2, 1)), np.zeros((N//2, 1))])
     y_full = np.hstack([y_in, y_out])
+    (x_train, x_test,
+     y_train, y_test) = train_test_split(x_full, y_full,
+                                         test_size=0.1)
+    return x_train, x_test, y_train, y_test
+
+
+def get_train_test_reg():
+    N = int(1e3)
+    np.random.seed(42)
+    x_full = np.random.normal(0, 1, (N, 2))
+    noise = np.random.normal(0, .01, N)
+    y_full = np.hstack(
+            [(x_full[:, 0] + x_full[:, 1] > noise).astype(int).reshape(N, 1),
+             (x_full[:, 0] + x_full[:, 1] < noise).astype(int).reshape(N, 1)])
     (x_train, x_test,
      y_train, y_test) = train_test_split(x_full, y_full,
                                          test_size=0.1)

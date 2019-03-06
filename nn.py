@@ -2,7 +2,7 @@ from backprop.graph import get_graph
 from backprop.traverse import Traverse
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from backprop.data import get_train_test, chunks
+from backprop.data import get_train_test_nn, chunks
 
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     traverse = Traverse(learning_rate)
 
     # Get the data
-    x_train, x_test, y_train, y_test = get_train_test()
+    x_train, x_test, y_train, y_test = get_train_test_nn()
 
     loss_history = []
     val_loss_history = []
@@ -27,9 +27,7 @@ if __name__ == "__main__":
             print(epoch)
 
         for x_batch, y_batch in chunks(x_train, y_train, 10):
-            x.value = x_batch
-            y.value = y_batch
-
+            x.value, y.value = x_batch, y_batch
             traverse.forward(L)
             traverse.backward()
 
@@ -39,7 +37,7 @@ if __name__ == "__main__":
         x.value, y.value = x_test, y_test
         traverse.forward(L)
         val_loss_history.append(L.value)
-        traverse.backward()
+        traverse.backward(update_weights=False)
 
     plt.figure(figsize=(4, 8))
     plt.subplot(2, 1, 1)
@@ -51,7 +49,7 @@ if __name__ == "__main__":
     x.value, y.value = x_test, y_test
     traverse.forward(L)
     y_pred = L.edges[0].value
-    traverse.backward()
+    traverse.backward(update_weights=False)
 
     plt.subplot(2, 1, 2)
     plt.scatter(x_test[:, 0], x_test[:, 1], c=y_pred[:, 0])
