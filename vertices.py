@@ -19,6 +19,15 @@ class Dot(Vertex):
         x, w = inputs
         return [np.dot(d, w.T), np.dot(x.T, d)]
 
+class Relu(Vertex):
+    def func(self, inputs):
+        x = inputs[0]
+        return x * (x > 0.)
+
+    def grads(self, inputs, d):
+        x = inputs[0]
+        return d * (x > 0.)
+
 
 class Softmax(Vertex):
     def func(self, inputs):
@@ -36,7 +45,7 @@ class CrossEntropy(Vertex):
     def func(self, inputs):
         y_pred, y_true = inputs
         nrows = y_true.shape[0]
-        y_pred_clipped = np.clip(y_pred, 1.e-17, 1. - 1.e-17)
+        y_pred_clipped = np.clip(y_pred, 1.e-7, 1. - 1.e-7)
         return - (y_true * np.log(y_pred_clipped)).sum() / nrows
 
     def grads(self, inputs, d):
